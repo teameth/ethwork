@@ -1,0 +1,1 @@
+python evaluator.py --embedding ./data/20line --label ./data/labellist-66.csv --node_type ./data/newestlands
