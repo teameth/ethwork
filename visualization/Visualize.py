@@ -114,7 +114,7 @@ if __name__ == '__main__':
 	print("6")
 	node_color = []
 	node_size = []
-	# 画图
+	
 	for line in names:
 		if line in key:
 			node_color.append('r')
