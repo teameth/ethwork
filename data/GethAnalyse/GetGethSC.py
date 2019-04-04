@@ -115,18 +115,21 @@ class GetGethBlockchain:
         CCG_csv_file = open('./data/CCG-Block{}To{}.csv'.format(start_number, end_number), 'w')                     
         MFGwriter = csv.writer(MFG_csv_file)
         CIGwriter = csv.writer(CIG_csv_file)
-        CCGwriter = csv.writer(CCG_csv_file)                        
+        CCGwriter = csv.writer(CCG_csv_file)
+        start_time = time.time()                        
         for i in range(start_number, end_number):
             if (i-start_number)%10000 == 0:
-                print('Block {} completed!'.format(i))			
-                print('complete %d ...' % (100*(i-start_number)/(end_number-start_number)))
+                print('Block {} completed, elapsed time {}s!'.format(i, time.time()-start_time))			
+                print('complete %d %%...' % (100*(i-start_number)/(end_number-start_number)))
+                start_time = time.time()
             block = self.getOneBlock(i)
             for t in block['transactions']:
                 trans_id += 1
-                f_short, f_type = self.shortHash(t['from'])
-                t_short, t_type = self.shortHash(t['to'])
-                o_list = [str(trans_id), block['height'], block['timestamp'], t['transactionhash'], 
-                                        t['from'], f_short, f_type, t['to'], t_short, t_type, t['value']]
+                # f_short, f_type = self.shortHash(t['from'])
+                # t_short, t_type = self.shortHash(t['to'])
+                # o_list = [str(trans_id), block['height'], block['timestamp'], t['transactionhash'], 
+                #                         t['from'], f_short, f_type, t['to'], t_short, t_type, t['value']]
+                o_list = [str(trans_id), block['height'], block['timestamp'], t['transactionhash'], t['from'], t['to'], t['value']]
                 if t['to'] is None:
                     CCGwriter.writerow(o_list)
                     continue
