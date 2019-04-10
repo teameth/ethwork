@@ -77,6 +77,8 @@ def parse_args():
                         help='Input graph type')
     parser.add_argument('--graph_format', default='edgelist', choices=['adjlist', 'edgelist'],
                         help='Input graph format')
+    parser.add_argument('--graph_file', default='',
+                        help='Input graph file')
     parser.add_argument('--output',
                         help='Output representation file')
     parser.add_argument('--directed', action='store_true',
@@ -112,3 +114,20 @@ if __name__ == "__main__":
         node_dict.read_label(args.exchange, 'exchange')
     if args.pool:
         node_dict.read_label(args.pool, 'pool')
+    start_time = time.time()
+    graph_file = open(args.graph_file, 'r')
+    graph_edges = graph_file.readlines()
+    graph_file.close()
+    sc_num = 0
+    line_num = 0
+    for row in graph_edges:
+        line_num += 1
+        nt = row.split()
+        if nt[1] not in node_dict.scSet:
+            sc_num += 1
+            graph_edges.remove(row)
+    print("{} lines read done, sc num {}, elapsed time {}".format(line_num, sc_num, time.time()-start_time))  
+    out_file = open(args.output, 'w')
+    out_file.writelines(graph_edges)
+    out_file.close()            
+      
