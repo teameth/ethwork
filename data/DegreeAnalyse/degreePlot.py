@@ -1,5 +1,5 @@
 """
-Clustering Evaluation: Conductance
+Plot degree distribution
 Author: Liu Yang
 Date: 2019-5-8
 """
@@ -223,29 +223,5 @@ if __name__ == "__main__":
     print("Edge Size: {}".format(g.G.number_of_edges()))
     
     plot_degree(g.G, args.figure)
-    # matplotlib.use('Agg')
-    # start_time = time.time()
-    # degree = nx.degree_histogram(g.G) #返回图中所有节点的度分布序列
-    # x = range(len(degree)) #生成X轴序列，从1到最大度
-    # totalDegree = float(sum(degree))
-    # y = [z/totalDegree for z in degree] # 将频次转化为频率，利用列表内涵
-    # print("Start plotting!")
-    # plt.loglog(x, y, color="blue", linewidth=2) #在双对坐标轴上绘制度分布曲线
-    # plt.title("Degree Distribution")
-    # plt.xlabel("Degree")
-    # plt.ylabel("Frequency")
-    # print("Figure done, elapsed time {}s".format(time.time()-start_time))
-    # if args.figure:
-    #     plt.savefig(args.figure)
-
-    # degrees = g.G.degree()
-    # degrees_w = g.G.degree(weight='weight')
-    # degreesDict = dict(degrees_w)
-    # degreesValue = sorted(set(degreesDict.values()))
-    # print(degreesValue[:10])
-    # degreesCount = [list(degreesDict.values()).count(x) for x in degreesValue]
-    # print(operator.eq(degree, degreesCount))
-    # print(len(degree))
-    # print(len(degreesCount))
-
+    
     
