@@ -19,10 +19,16 @@ def parse_args():
                         help='Input data file or dir')
     parser.add_argument('--input_type', default='FILE', choices=['FILE', 'DIR'],
                         help='Input path is a directory or file')
+    parser.add_argument('--undirected', action='store_true',
+                        help='Treat the input graph as undirected.')
     parser.add_argument('--graph_type', default='CIG', choices=['MFG', 'CIG', 'CCG'],
                         help='Input graph type')
     parser.add_argument('--output',
-                        help='Output representation file')
+                        help='Output edgelist file')
+    parser.add_argument('--dict',
+                        help='Output node dict file')
+    parser.add_argument('--weighted', action='store_true',
+                        help='Output edgelist with edge weights')
     parser.add_argument('--start', default='',
                         help='Start block id, include in the results')
     parser.add_argument('--end', default='',
@@ -82,8 +88,23 @@ if __name__ == "__main__":
     print("Edge Size: {}".format(G.number_of_edges()))
 
     G_int = nx.relabel.convert_node_labels_to_integers(G, first_label=0, ordering="default", label_attribute='address')
-    # addressDict = nx.get_node_attributes(G_int, 'address')
-    # print(addressDict.items())
-    nx.write_edgelist(G_int, args.output, delimiter=' ', data=False)
+    if args.dict:
+        addressDict = nx.get_node_attributes(G_int, 'address')
+        w = csv.writer(open(args.dict, "w"))
+        for node_id, addr in addressDict.items():
+            w.writerow([node_id, addr])
+    if args.undirected: # output undirected graph
+        H = G_int.to_undirected()
+        print("Node Size of undirected graph: {}".format(H.number_of_nodes()))
+        print("Edge Size of undirected graph: {}".format(H.number_of_edges()))
+        if args.weighted:
+            nx.write_weighted_edgelist(H, args.output, delimiter=' ')
+        else:
+            nx.write_edgelist(H, args.output, delimiter=' ', data=False)
+    else:  
+        if args.weighted:
+            nx.write_weighted_edgelist(G_int, args.output, delimiter=' ')
+        else:
+            nx.write_edgelist(G_int, args.output, delimiter=' ', data=False)
     
     # nx.write_weighted_edgelist(G, args.output, delimiter='\t')
