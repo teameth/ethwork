@@ -7,10 +7,34 @@ import binascii
 import requests
 import json
 from multiprocessing import Pool
+import networkx as nx
 import sys
 import time
 from web3 import Web3
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
+
+def parse_args():
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter,
+                            conflict_handler='resolve')
+    parser.add_argument('--dir', required=True,
+                        help='Input data file dir')
+    parser.add_argument('--graph_type', default='CIG', choices=['MFG', 'CIG', 'CCG'],
+                        help='Input graph type')
+    parser.add_argument('--graph_format', default='edgelist', choices=['adjlist', 'edgelist'],
+                        help='Input graph format')
+    parser.add_argument('--output',
+                        help='Output representation file')
+    parser.add_argument('--directed', action='store_true',
+                        help='Treat graph as directed.')
+    parser.add_argument('--label', default='',
+                        help='The file of node label')
+    parser.add_argument('--feature_file', default='',
+                        help='The file of node features')
+    parser.add_argument('--weighted', action='store_true',
+                        help='Treat graph as weighted')
+    args = parser.parse_args()
+    return args
 
         
 def getType(addrTuple):
@@ -75,6 +99,12 @@ def write_dict(out_path, nodeTypeList):
         dict_writer.writerow(list(nt))
     out_file.close()
     print("{} lines written done, elapsed time {}".format(len(nodeTypeList), time.time()-start_time))
+
+
+def generate_dict_from_graph(graph_file):
+    G = nx.read_weighted_edgelist(graph_file, delimiter='\t', create_using=nx.DiGraph)
+    node_lst = G.nodes
+    
     
 
 

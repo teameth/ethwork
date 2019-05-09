@@ -1,17 +1,17 @@
 """
-Reduce nodes and edges in the graph according to degree distribution.
+Spectual Clustering.
 Author: Liu Yang
-Date: 2019-5-9
+Date: 2019-4-29
 """
 
-import csv
-import matplotlib
-import matplotlib.pyplot as plt
 import networkx as nx
+import pickle as pkl
 import numpy as np
-import operator
+import scipy.sparse as sp
 import time
+import csv
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from sklearn.cluster import SpectralClustering
 
 
 class Graph(object):
@@ -144,10 +144,10 @@ def parse_args():
     parser.add_argument('--graph_format', default='edgelist', choices=['adjlist', 'edgelist'],
                         help='Input graph format')
     parser.add_argument('--output',
-                        help='Output reduced graph file')
+                        help='Output representation file')
     parser.add_argument('--directed', action='store_true',
                         help='Treat graph as directed.')
-    parser.add_argument('--figure', default='',
+    parser.add_argument('--label', default='',
                         help='The file of node label')
     parser.add_argument('--feature_file', default='',
                         help='The file of node features')
@@ -166,17 +166,6 @@ def read_labeled_account(filename):
     return label.keys()
 
 
-def read_cluster(filename):
-    cluster = {}
-    with open(filename, 'r') as clusterfile:
-        clusterLines = clusterfile.readlines()
-    for line in clusterLines:
-        center_id, cluster_id = line.strip().split('\t')
-        clusterList = cluster_id.split(',')
-        cluster[int(center_id)] = clusterList
-    return cluster
-
-
 def get_top_k_candidates(targetList, k, labelList, outPath=None):
     top_k_list = targetList[:k]
     top_k_dict = dict(top_k_list)  # key is address str, value is degree
@@ -191,60 +180,21 @@ def get_top_k_candidates(targetList, k, labelList, outPath=None):
         f_r.close()
 
 
-def plot_degree(G, save_path=None):
-    matplotlib.use('Agg')
-    degrees = G.degree() # Return a (node_id, node_degree) list
-    # degrees_w = G.degree(weight='weight') 
-    degreesDict = dict(degrees)
-    degreesValue = sorted(set(degreesDict.values())) # Remove duplicate, default ascending order
-    degreesCount = [list(degreesDict.values()).count(x) for x in degreesValue]
-    plt.loglog(degreesValue, degreesCount, 'r.') 
-    plt.title("Degree Distribution")
-    plt.xlabel("Degree")
-    plt.ylabel("Frequency")
-    if save_path:
-        plt.savefig(save_path)
-
-def reduce_nodes(G, degreeThres, Fdeepcopy=False):
-    if Fdeepcopy:
-        H = G.copy()
-    else:
-        H = G
-    degree = H.degree()
-    degreeFilter = filter(lambda x: x[1]<degreeThres, degree)
-    removeDict = dict(list(degreeFilter))
-    removeNode = removeDict.keys()
-    print("Remove {} nodes with degree less than {}".format(len(removeNode), degreeThres))
-    H.remove_nodes_from(removeNode)
-    print("New Node Size: {}".format(H.number_of_nodes()))
-    print("New Edge Size: {}".format(H.number_of_edges()))
 
 
 if __name__ == "__main__":
     args = parse_args()
-    # GG = nx.lollipop_graph(4, 6)
-    # print(GG.degree())
     g = Graph()
-    start_time = time.time()
     if args.graph_format == 'adjlist':
         g.read_adjlist(filename=args.input)
     elif args.graph_format == 'edgelist':
         g.read_edgelist(filename=args.input, weighted=args.weighted,
                         directed=args.directed)
-    
-    print("File read done, elapsed time {}s".format(time.time()-start_time))
-    print("Node Size: {}".format(g.G.number_of_nodes()))
-    print("Edge Size: {}".format(g.G.number_of_edges()))
-    
-    if args.figure:
-        plot_degree(g.G, args.figure)
-    # for degreeThres in range(10, 21, 2):
-    #     reduce_nodes(g.G, degreeThres, True)
-    reduce_nodes(g.G, 20, False)
-    print("New Node Size: {}".format(g.G.number_of_nodes()))
-    print("New Edge Size: {}".format(g.G.number_of_edges()))
-
-    if args.output:
-        nx.write_weighted_edgelist(g.G, args.output, delimiter=' ')
+    start_time = time.time()
+    X = nx.to_numpy_matrix(g.G)
+    print("Matrix generated, elapsed time {}s").format(time.time()-start_time)
+    start_time = time.time()
+    clustering = SpectralClustering(n_clusters=10, assign_labels="discretize", random_state=0).fit(X)
+    print("Clustering done, elapsed time {}s").format(time.time()-start_time)
     
     
