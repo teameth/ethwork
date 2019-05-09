@@ -120,14 +120,16 @@ if __name__ == "__main__":
     graph_file.close()
     sc_num = 0
     line_num = 0
+    out_file = open(args.output, 'w')
     for row in graph_edges:
         line_num += 1
         nt = row.split()
-        if nt[1] not in node_dict.scSet:
+        short = node_dict.long2short[nt[1][2:]]
+        if short in node_dict.scSet:
             sc_num += 1
-            graph_edges.remove(row)
+            out_file.write(row)
     print("{} lines read done, sc num {}, elapsed time {}".format(line_num, sc_num, time.time()-start_time))  
-    out_file = open(args.output, 'w')
-    out_file.writelines(graph_edges)
+    # out_file = open(args.output, 'w')
+    # out_file.writelines(graph_edges)
     out_file.close()            
       
